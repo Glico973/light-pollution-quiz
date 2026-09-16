@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Light Pollution Quiz 🌌</title>
+
+<style>
+
+* {
+box-sizing: border-box;
+}
+
+body {
+
+margin: 0;
+
+min-height: 100vh;
+
+font-family: Arial, sans-serif;
+
+color: white;
+
+display: flex;
+
+justify-content: center;
+
+align-items: center;
+
+padding: 20px;
+
+overflow: hidden;
+
+background:
+radial-gradient(
+circle at top,
+#314b91,
+#111c42 40%,
+#030611 85%
+);
+}
+
+
+/* ⭐ BACKGROUND STARS */
+
+body::before {
+
+content: "";
+
+position: fixed;
+
+inset: 0;
+
+pointer-events: none;
+
+background-image:
+
+radial-gradient(
+circle,
+white 1px,
+transparent 2px
+),
+
+radial-gradient(
+circle,
+white 1px,
+transparent 2px
+),
+
+radial-gradient(
+circle,
+white 2px,
+transparent 3px
+);
+
+background-size:
+80px 80px,
+130px 130px,
+220px 220px;
+
+animation: stars 4s infinite alternate;
+}
+
+
+@keyframes stars {
+
+from {
+opacity: 0.25;
+}
+
+to {
+opacity: 0.85;
+}
+}
+
+
+/* 🌙 MOON */
+
+.moon {
+
+position: fixed;
+
+top: 35px;
+
+right: 40px;
+
+width: 90px;
+
+height: 90px;
+
+border-radius: 50%;
+
+background: #fff6c7;
+
+box-shadow:
+0 0 15px #fff6c7,
+0 0 40px #fff6c7;
+}
+
+
+/* ☄️ SHOOTING STAR */
+
+.shooting-star {
+
+position: fixed;
+
+width: 100px;
+
+height: 3px;
+
+background:
+linear-gradient(
+90deg,
+transparent,
+white
+);
+
+transform: rotate(-25deg);
+
+left: -120px;
+
+top: 20%;
+
+animation: shootingStar 6s linear infinite;
+}
+
+
+@keyframes shootingStar {
+
+0% {
+
+left: -120px;
+
+top: 15%;
+}
+
+45% {
+
+left: 110%;
+
+top: 55%;
+}
+
+100% {
+
+left: 110%;
+
+top: 55%;
+}
+}
+
+
+/* 🌌 MAIN BOX */
+
+.quiz-box {
+
+position: relative;
+
+z-index: 2;
+
+width: 100%;
+
+max-width: 650px;
+
+padding: 30px;
+
+border-radius: 25px;
+
+background:
+rgba(7, 15, 36, 0.95);
+
+border: 1px solid #40598c;
+
+box-shadow:
+
+0 0 25px
+rgba(90, 140, 255, 0.3),
+
+0 20px 50px
+rgba(0, 0, 0, 0.6);
+}
+
+
+/* ✨ TITLE */
+
+.title-stars {
+
+font-size: 25px;
+
+letter-spacing: 10px;
+
+margin-bottom: 10px;
+}
+
+
+h1 {
+
+font-size: 36px;
+
+margin-top: 5px;
+
+margin-bottom: 15px;
+}
+
+
+h2 {
+
+line-height: 1.4;
+}
+
+
+p {
+
+color: #cbd5e1;
+
+line-height: 1.5;
+}
+
+
+/* 🔘 BUTTONS */
+
+button {
+
+display: block;
+
+width: 100%;
+
+padding: 16px;
+
+margin: 10px 0;
+
+border: 1px solid #3b527d;
+
+border-radius: 13px;
+
+background: #1b2c4c;
+
+color: white;
+
+font-size: 17px;
+
+cursor: pointer;
+
+transition: 0.2s;
+}
+
+
+button:hover {
+
+transform: translateY(-2px);
+
+background: #29436e;
+}
+
+
+.start-button {
+
+background: #2878ff;
+
+border-color: #66a0ff;
+
+font-weight: bold;
+}
+
+
+.start-button:hover {
+
+background: #438bff;
+}
+
+
+/* 🟩 CORRECT */
+
+.correct {
+
+background: #20a84b !important;
+
+border-color: #69ef91 !important;
+}
+
+
+/* 🟥 WRONG */
+
+.wrong {
+
+background: #e53935 !important;
+
+border-color: #ff8a87 !important;
+}
+
+
+button:disabled {
+
+cursor: default;
+}
+
+
+/* 📊 PROGRESS */
+
+.progress-container {
+
+width: 100%;
+
+height: 10px;
+
+background: #263653;
+
+border-radius: 20px;
+
+overflow: hidden;
+
+margin: 18px 0;
+}
+
+
+.progress-bar {
+
+height: 100%;
+
+width: 0%;
+
+background: #4c9aff;
+
+border-radius: 20px;
+
+transition: width 0.4s;
+}
+
+
+/* ⭐ SCORE */
+
+.score {
+
+text-align: center;
+
+font-size: 25px;
+
+color: #7dd3fc;
+
+font-weight: bold;
+
+margin: 15px;
+}
+
+
+/* 🏆 RESULTS */
+
+.result {
+
+text-align: center;
+}
+
+
+.final-score {
+
+font-size: 55px;
+
+font-weight: bold;
+
+color: #7dd3fc;
+
+margin: 15px;
+}
+
+
+.percentage {
+
+font-size: 28px;
+
+color: white;
+}
+
+
+.hidden {
+
+display: none;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- 🌙 MOON -->
+
+<div class="moon"></div>
+
+
+<!-- ☄️ SHOOTING STAR -->
+
+<div class="shooting-star"></div>
+
+
+<!-- 🌌 QUIZ -->
+
+<div class="quiz-box">
+
+
+<!-- 🏠 HOME -->
+
+<div id="home">
+
+<div class="title-stars">
+
+✦ ★ ✦ ★ ✦
+
+</div>
+
+
+<h1>
+
+🌃 Light Pollution Quiz
+
+</h1>
+
+
+<p>
+
+Test your knowledge about
+light pollution and how it
+affects our planet.
+
+</p>
+
+
+<button
+class="start-button"
+onclick="startQuiz()">
+
+START QUIZ 🚀
+
+</button>
+
+</div>
+
+
+
+<!-- 🧠 QUESTIONS -->
+
+<div
+id="quiz"
+class="hidden">
+
+
+<p id="questionNumber"></p>
+
+
+<div class="progress-container">
+
+<div
+id="progressBar"
+class="progress-bar">
+</div>
+
+</div>
+
+
+<div class="score">
+
+⭐ Score:
+<span id="score">0</span>
+
+</div>
+
+
+<h2 id="question"></h2>
+
+
+<div id="answers"></div>
+
+
+</div>
+
+
+
+<!-- 🏆 RESULT -->
+
+<div
+id="result"
+class="hidden result">
+
+
+<div class="title-stars">
+
+★ ✦ ★
+
+</div>
+
+
+<h1>
+
+🎉 Quiz Complete!
+
+</h1>
+
+
+<div
+id="finalScore"
+class="final-score">
+
+</div>
+
+
+<div
+id="percentage"
+class="percentage">
+
+</div>
+
+
+<p id="message"></p>
+
+
+<button
+class="start-button"
+onclick="startQuiz()">
+
+PLAY AGAIN 🔄
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =========================
+QUESTIONS
+========================= */
+
+
+const questions = [
+
+
+{
+
+question:
+"What is light pollution?",
+
+answers: [
+
+"Too much sunlight",
+
+"Excessive artificial light at night",
+
+"A type of air pollution",
+
+"Light from the Moon"
+
+],
+
+correct: 1
+
+},
+
+
+{
+
+question:
+"Where is light pollution usually strongest?",
+
+answers: [
+
+"Large cities",
+
+"Deep forests",
+
+"The ocean",
+
+"High mountains"
+
+],
+
+correct: 0
+
+},
+
+
+{
+
+question:
+"What can light pollution make harder to see?",
+
+answers: [
+
+"Clouds",
+
+"Rain",
+
+"Stars",
+
+"Trees"
+
+],
+
+correct: 2
+
+},
+
+
+{
+
+question:
+"How can light pollution affect animals?",
+
+answers: [
+
+"It can disrupt their natural behaviour",
+
+"It gives them better eyesight",
+
+"It makes them grow faster",
+
+"It has no effect"
+
+],
+
+correct: 0
+
+},
+
+
+{
+
+question:
+"Which action can help reduce light pollution?",
+
+answers: [
+
+"Making lights brighter",
+
+"Pointing lights toward the sky",
+
+"Turning unnecessary lights off",
+
+"Leaving lights on all night"
+
+],
+
+correct: 2
+
+},
+
+
+{
+
+question:
+"Why can light pollution be a problem for astronomers?",
+
+answers: [
+
+"It can make faint stars harder to see",
+
+"It makes telescopes disappear",
+
+"It creates new planets",
+
+"It changes Earth's gravity"
+
+],
+
+correct: 0
+
+},
+
+
+{
+
+question:
+"What is a dark-sky area?",
+
+answers: [
+
+"A place underground",
+
+"An area where unnecessary artificial light is limited",
+
+"A room with no windows",
+
+"A place where the Sun never shines"
+
+],
+
+correct: 1
+
+},
+
+
+{
+
+question:
+"What is a good outdoor-lighting goal?",
+
+answers: [
+
+"Use as much light as possible",
+
+"Point lights into the sky",
+
+"Use only the amount of light needed",
+
+"Leave every light on"
+
+],
+
+correct: 2
+
+}
+
+];
+
+
+
+/* =========================
+VARIABLES
+========================= */
+
+
+let currentQuestion = 0;
+
+let score = 0;
+
+
+
+/* =========================
+START QUIZ
+========================= */
+
+
+function startQuiz() {
+
+
+currentQuestion = 0;
+
+score = 0;
+
+
+document
+.getElementById("home")
+.classList
+.add("hidden");
+
+
+document
+.getElementById("result")
+.classList
+.add("hidden");
+
+
+document
+.getElementById("quiz")
+.classList
+.remove("hidden");
+
+
+document
+.getElementById("score")
+.textContent = score;
+
+
+showQuestion();
+
+}
+
+
+
+/* =========================
+SHOW QUESTION
+========================= */
+
+
+function showQuestion() {
+
+
+const question =
+questions[currentQuestion];
+
+
+document
+.getElementById("questionNumber")
+.textContent =
+"Question " +
+(currentQuestion + 1) +
+" of " +
+questions.length;
+
+
+
+/* Progress bar */
+
+const progress =
+(currentQuestion /
+questions.length) * 100;
+
+
+document
+.getElementById("progressBar")
+.style
+.width =
+progress + "%";
+
+
+
+/* Question */
+
+document
+.getElementById("question")
+.textContent =
+question.question;
+
+
+
+/* Answers */
+
+const answers =
+document.getElementById("answers");
+
+
+answers.innerHTML = "";
+
+
+
+question.answers.forEach(
+
+function(answer, index) {
+
+
+const button =
+document.createElement("button");
+
+
+button.textContent =
+answer;
+
+
+
+button.onclick =
+function() {
+
+
+/* Prevent multiple clicks */
+
+const buttons =
+document
+.querySelectorAll(
+"#answers button"
+);
+
+
+buttons.forEach(
+
+function(btn) {
+
+btn.disabled = true;
+
+}
+
+);
+
+
+
+/* CORRECT */
+
+if (
+index ===
+question.correct
+) {
+
+
+button
+.classList
+.add("correct");
+
+
+score++;
+
+
+document
+.getElementById("score")
+.textContent =
+score;
+
+}
+
+
+
+/* WRONG */
+
+else {
+
+
+button
+.classList
+.add("wrong");
+
+
+/* Show correct answer */
+
+buttons[
+question.correct
+]
+.classList
+.add("correct");
+
+}
+
+
+
+/* Wait before next question */
+
+setTimeout(
+
+function() {
+
+
+currentQuestion++;
+
+
+if (
+currentQuestion <
+questions.length
+) {
+
+
+showQuestion();
+
+}
+
+
+else {
+
+
+showResult();
+
+}
+
+
+},
+
+1000
+
+);
+
+};
+
+
+
+answers.appendChild(button);
+
+}
+
+);
+
+}
+
+
+
+/* =========================
+SHOW RESULT
+========================= */
+
+
+function showResult() {
+
+
+document
+.getElementById("quiz")
+.classList
+.add("hidden");
+
+
+document
+.getElementById("result")
+.classList
+.remove("hidden");
+
+
+
+/* Full progress */
+
+document
+.getElementById("progressBar")
+.style
+.width = "100%";
+
+
+
+/* Final score */
+
+document
+.getElementById("finalScore")
+.textContent =
+score +
+" / " +
+questions.length;
+
+
+
+/* Percentage */
+
+const percentage =
+Math.round(
+(score /
+questions.length) * 100
+);
+
+
+document
+.getElementById("percentage")
+.textContent =
+percentage + "%";
+
+
+
+/* Message */
+
+if (
+score ===
+questions.length
+) {
+
+
+document
+.getElementById("message")
+.textContent =
+"🌟 PERFECT SCORE! You know your light pollution!";
+
+
+}
+
+
+else if (score >= 6) {
+
+
+document
+.getElementById("message")
+.textContent =
+"🔥 Great job! You know a lot about light pollution!";
+
+
+}
+
+
+else if (score >= 4) {
+
+
+document
+.getElementById("message")
+.textContent =
+"👍 Good work! Keep learning!";
+
+
+}
+
+
+else {
+
+
+document
+.getElementById("message")
+.textContent =
+"💡 Keep learning about light pollution!";
+
+}
+
+}
+
+
+</script>
+
+</body>
+
+</html>
