@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Light Pollution Fixer</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #0b0d17;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    h1 {
+      margin: 10px 0 5px 0;
+      font-size: 24px;
+    }
+
+    p {
+      margin: 0 0 15px 0;
+      color: #8a99ad;
+      font-size: 14px;
+    }
+
+    #game-container {
+      display: flex;
+      gap: 20px;
+      background: #16192b;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    canvas {
+      background: #05070f;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #shop {
+      width: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .stat-box {
+      background: #212640;
+      padding: 12px;
+      border-radius: 8px;
+    }
+
+    .stat-title {
+      font-size: 12px;
+      color: #8a99ad;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: #4ed1a4;
+    }
+
+    button {
+      background: #2e3654;
+      color: #ffffff;
+      border: 2px solid #3d476e;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    button:hover:not(:disabled) {
+      background: #3d476e;
+      border-color: #4ed1a4;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-cost {
+      font-size: 12px;
+      color: #e2b714;
+      display: block;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>✨ Light Pollution Fixer</h1>
+  <p>Click glowing lights to turn them off and reduce light pollution!</p>
+
+  <div id="game-container">
+    <canvas id="gameCanvas" width="500" height="400"></canvas>
+    
+    <div id="shop">
+      <div class="stat-box">
+        <div class="stat-title">Starlight Points</div>
+        <div id="points" class="stat-value">0</div>
+      </div>
+
+      <div class="stat-box">
+        <div class="stat-title">Sky Visibility</div>
+        <div id="sky-clarity" class="stat-value">0%</div>
+      </div>
+
+      <h3>Upgrades</h3>
+
+      <button id="buy-auto" onclick="buyAutoOff()">
+        ⚡ Auto-Turn Off
+        <span id="auto-cost" class="btn-cost">Cost: 15 pts (Lvl 0)</span>
+      </button>
+
+      <button id="buy-speed" onclick="buySpawnSpeed()">
+        🌃 Darker City (Fewer Lights)
+        <span id="speed-cost" class="btn-cost">Cost: 25 pts (Lvl 0)</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Game Variables
+    let points = 0;
+    let lightsOffTotal = 0;
+    let lights = [];
+    
+    // Upgrades
+    let autoOffLevel = 0;
+    let autoOffCost = 15;
+    
+    let spawnDelayLevel = 0;
+    let spawnDelayCost = 25;
+    let spawnRate = 2000; // milliseconds per new light spawn
+
+    // City Buildings Background Data
+    const buildings = [
+      { x: 30, w: 60, h: 220 },
+      { x: 100, w: 80, h: 150 },
+      { x: 190, w: 70, h: 280 },
+      { x: 270, w: 90, h: 180 },
+      { x: 370, w: 60, h: 240 },
+      { x: 440, w: 50, h: 130 }
+    ];
+
+    // Spawn initial lights
+    function spawnLight() {
+      if (lights.length < 15) {
+        const building = buildings[Math.floor(Math.random() * buildings.length)];
+        const lightX = building.x + 15 + Math.random() * (building.w - 30);
+        const lightY = (canvas.height - building.h) + 20 + Math.random() * (building.h - 40);
+
+        lights.push({
+          x: lightX,
+          y: lightY,
+          radius: 12,
+          color: '#ffe600'
+        });
+      }
+    }
+
+    // Handle Player Clicks on Lights
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      for (let i = lights.length - 1; i >= 0; i--) {
+        const dist = Math.hypot(clickX - lights[i].x, clickY - lights[i].y);
+        if (dist < lights[i].radius + 5) {
+          turnOffLight(i);
+          break;
+        }
+      }
+    });
+
+    function turnOffLight(index) {
+      lights.splice(index, 1);
+      points += 1;
+      lightsOffTotal += 1;
+      updateUI();
+    }
+
+    // Upgrades Logic
+    function buyAutoOff() {
+      if (points >= autoOffCost) {
+        points -= autoOffCost;
+        autoOffLevel++;
+        autoOffCost = Math.floor(autoOffCost * 1.8);
+        updateUI();
+      }
+    }
+
+    function buySpawnSpeed() {
+      if (points >= spawnDelayCost) {
+        points -= spawnDelayCost;
+        spawnDelayLevel++;
+        spawnDelayCost = Math.floor(spawnDelayCost * 2.2);
+        spawnRate = Math.max(500, spawnRate - 250); // Reduces light spawn frequency
+        resetSpawnInterval();
+        updateUI();
+      }
+    }
+
+    // Auto-Turn Off Interval (Runs every 1 second)
+    setInterval(() => {
+      for (let i = 0; i < autoOffLevel; i++) {
+        if (lights.length > 0) {
+          turnOffLight(0);
+        }
+      }
+    }, 1000);
+
+    // Spawning Interval
+    let spawnInterval;
+    function resetSpawnInterval() {
+      clearInterval(spawnInterval);
+      spawnInterval = setInterval(spawnLight, spawnRate);
+    }
+    resetSpawnInterval();
+
+    // UI Updates
+    function updateUI() {
+      document.getElementById('points').innerText = points;
+      document.getElementById('auto-cost').innerText = `Cost: ${autoOffCost} pts (Lvl ${autoOffLevel})`;
+      document.getElementById('speed-cost').innerText = `Cost: ${spawnDelayCost} pts (Lvl ${spawnDelayLevel})`;
+      
+      document.getElementById('buy-auto').disabled = points < autoOffCost;
+      document.getElementById('buy-speed').disabled = points < spawnDelayCost;
+
+      // Calculate Sky Clarity
+      const totalSkyScore = Math.min(100, Math.floor((lightsOffTotal * 2) - (lights.length * 3)));
+      document.getElementById('sky-clarity').innerText = `${Math.max(0, totalSkyScore)}%`;
+    }
+
+    // Main Render Loop
+    function draw() {
+      // Clear Screen (Sky color darkens as light pollution goes down)
+      const skyGlow = Math.min(60, lights.length * 4);
+      ctx.fillStyle = `rgb(${5 + skyGlow}, ${7 + skyGlow}, ${15 + skyGlow})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw Stars (Visible if light pollution is low)
+      if (lights.length < 8) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+        const starCount = (8 - lights.length) * 5;
+        for(let i=0; i < starCount; i++) {
+          const sx = (i * 73) % canvas.width;
+          const sy = (i * 37) % (canvas.height / 2);
+          ctx.fillRect(sx, sy, 2, 2);
+        }
+      }
+
+      // Draw City Buildings
+      ctx.fillStyle = "#0d101d";
+      buildings.forEach(b => {
+        ctx.fillRect(b.x, canvas.height - b.h, b.w, b.h);
+      });
+
+      // Draw Lights & Light Glow
+      lights.forEach(light => {
+        // Outer Glow
+        const gradient = ctx.createRadialGradient(light.x, light.y, 2, light.x, light.y, 25);
+        gradient.addColorStop(0, 'rgba(255, 230, 0, 0.8)');
+        gradient.addColorStop(1, 'rgba(255, 230, 0, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(light.x, light.y, 25, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Inner Bulb
+        ctx.fillStyle = light.color;
+        ctx.beginPath();
+        ctx.arc(light.x, light.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    // Start Game Loop & Initial Setup
+    for(let i = 0; i < 4; i++) spawnLight();
+    updateUI();
+    draw();
+  </script>
+</body>
+</html>
